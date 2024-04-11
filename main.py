@@ -1,5 +1,7 @@
 from pathlib import Path
+import os
 import popup_gui
+from PyQt5.QtWidgets import QMessageBox
 import time
 
 """
@@ -12,6 +14,9 @@ import time
 path = Path.cwd()
 # path = Path("/home/l_kanan/Bureau")
 start_time = time.time()
+attention_popup = popup_gui.attention_popup(path.name)
+numer_of_files = 0
+number_of_folders = 0
 
 file_extensions = {
     "Text files": [".txt", ".rtf", ".doc", ".docx", ".odt", ".md", ".pages"],
@@ -38,6 +43,7 @@ file_extensions = {
     "Binary files": [".dat"],
     "ICalendar files": [".ics"],
     "E-mail files": [".eml"],
+    "Excel Macro": [".xlsm"],
 }
 
 """
@@ -46,42 +52,57 @@ absolu dans la variable path
 La methode iterdir() permet de faire une iteration sur les fichiers contenus dans un dossier représenté par le chemin 
 dans l'objet path
 """
-for file in path.iterdir():
-    """
-    La methode items() appliquée sur un dictonnaire permet de faire une iteration double, dans ce cas on recupere la
-    clé et la valeur au meme moment d'une iteration
-    """
-    for file_type, extensions in file_extensions.items():
-        for extension in extensions:
-            """
-            La methode suffix() sur un objet Path permet de recuperer l'extension du fichier représenter dans le
-            chemin contenu dans l'objet Path
-            """
-            if file.suffix.lower() == extension:
-                # print(file_type)
+
+if attention_popup == QMessageBox.Ok:
+    start_time = time.time()
+    for file in path.iterdir():
+        """
+        La methode items() appliquée sur un dictonnaire permet de faire une iteration double, dans ce cas on recupere la
+        clé et la valeur au meme moment d'une iteration
+        """
+        for file_type, extensions in file_extensions.items():
+            for extension in extensions:
                 """
-                Création d'un dossier, on definit le nouveau dossier par son chemin complet en combinant un chemin
-                dans un objet Path et le nouveau nom du dossier et pour ce cas le nom de dossier c'est la cle
-                file_type
+                La methode suffix() sur un objet Path permet de recuperer l'extension du fichier représenter dans le
+                chemin contenu dans l'objet Path
                 """
-                directory = path / file_type
-                """
-                La methode mkdir() permet de creer un dossier, son attribut exist_ok permet d'eviter ou non de generer
-                une erreur lorsque l'on veut creer un dossier qui existe deja et il prend une valeur booleenne par
-                defaut il a la valeur False si on ne le precise pas et si on lui donne la valeur True on ne va plus
-                generer une erreur mais on ne va simplement pas creer un dossier qui existe deja et s'il n'existe pas
-                on va le creer
-                """
-                directory.mkdir(exist_ok=True)
-                """
-                La variable dùinstance name appliquée sur l'objet Path renvoi une chaine de caractere correspondant au
-                nom+l'extension du fichier
-                """
-                file.rename(directory / file.name)
-                break
-end_time = time.time()
-# La fonction round nous permet d'arrondir un nombre à 3 chiffres après la virgule
-popup_gui.create_popup(round((end_time - start_time), 3))
+                if file.suffix.lower() == extension:
+                    numer_of_files += 1
+                    # print(file_type)
+                    """
+                    Création d'un dossier, on definit le nouveau dossier par son chemin complet en combinant un chemin
+                    dans un objet Path et le nouveau nom du dossier et pour ce cas le nom de dossier c'est la cle
+                    file_type
+                    """
+                    directory = path / file_type
+                    """
+                    La methode mkdir() permet de creer un dossier, son attribut exist_ok permet d'eviter ou non de generer
+                    une erreur lorsque l'on veut creer un dossier qui existe deja et il prend une valeur booleenne par
+                    defaut il a la valeur False si on ne le precise pas et si on lui donne la valeur True on ne va plus
+                    generer une erreur mais on ne va simplement pas creer un dossier qui existe deja et s'il n'existe pas
+                    on va le creer
+                    """
+                    if not directory.exists():
+                        number_of_folders += 1
+                    directory.mkdir(exist_ok=True)
+                    """
+                    La variable d'instance name appliquée sur l'objet Path renvoi une chaine de caractere correspondant au
+                    nom+l'extension du fichier
+                    """
+                    if (directory / file.name).exists():
+                        replacement_popup = popup_gui.replacement_popup(file.name, directory.name)
+                        if replacement_popup == QMessageBox.Yes:
+                            os.replace((path / file).resolve(), (directory / file.name).resolve())
+                        elif replacement_popup == QMessageBox.No:
+                            numer_of_files -= 1
+                            continue
+                    else:
+                        file.rename(directory / file.name)
+                    break
+    end_time = time.time()
+    popup_gui.rapport_popup(round((end_time - start_time), 3), number_of_folders, numer_of_files)
+elif attention_popup == QMessageBox.Cancel:
+    popup_gui.contact_popup()
 # create_files()
 # for content in path.iterdir():
 #     print(content.suffix)
