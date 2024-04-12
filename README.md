@@ -2,7 +2,7 @@
 
 Ceci est un petit script pour classer ou organiser automatiquement les fichiers dans des dossiers avec des noms selon
 leurs extensions avec le langage Python.
-Ce script doit etre executé dans n'importe quel repertoire sur l'ordinateur ayant des fichiers à organiser.
+Ce script doit etre executé dans n'importe quel repertoire sur l'ordinateurgit  ayant des fichiers à organiser.
 Avec path = Path.cwd() on recupère directement le chemin vers le repertoire courant, mais vous pouvez changer en
 personnalisant le chemin avec la syntaxe custom_path = Path("/chemin/vers/repertoire")
 
